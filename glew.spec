@@ -1,6 +1,6 @@
 Name:           glew
 Version:        1.9.0
-Release:        4%{?dist}
+Release:        6%{?dist}
 Summary:        The OpenGL Extension Wrangler Library
 Group:          System Environment/Libraries
 License:        BSD and MIT
@@ -102,6 +102,12 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/*
 
 %changelog
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 1.9.0-6
+- Mass rebuild 2014-01-24
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 1.9.0-5
+- Mass rebuild 2013-12-27
+
 * Wed Nov 06 2013 Dave Airlie <airlied@redhat.com> 1.9.0-4
 - fix build for non-x86 arch
 
