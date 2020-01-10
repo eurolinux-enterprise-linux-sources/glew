@@ -1,14 +1,13 @@
 Name:           glew
-Version:        1.10.0
-Release:        5%{?dist}
+Version:        1.9.0
+Release:        4%{?dist}
 Summary:        The OpenGL Extension Wrangler Library
 Group:          System Environment/Libraries
 License:        BSD and MIT
 URL:            http://glew.sourceforge.net
 
 Source0:        http://downloads.sourceforge.net/project/glew/glew/%{version}/glew-%{version}.tgz
-Patch0:		0001-BUILD-respect-DESTDIR-variable.patch
-Patch1:         glew-1.9.0-makefile.patch
+Patch0:         glew-1.9.0-makefile.patch
 BuildRequires:  libGLU-devel
 
 %description
@@ -49,20 +48,26 @@ libGLEWmx
 
 %prep
 %setup -q
-%patch0 -p1 -b .bld
-%patch1 -p1 -b .make
+%patch0 -p1 -b .make
 
-# update config.guess for new arch support
-cp /usr/lib/rpm/redhat/config.guess config/
+# get updated version which recognizes aarch64
+cp /usr/lib/rpm/redhat/config.guess config
+
+sed -i -e 's/\r//g' config/config.guess
 
 %build
-make %{?_smp_mflags} CFLAGS.EXTRA="$RPM_OPT_FLAGS -fPIC" includedir=%{_includedir} STRIP= libdir=%{_libdir} bindir=%{_bindir} GLEW_DEST=
+
+make %{?_smp_mflags} CFLAGS.EXTRA="$RPM_OPT_FLAGS" includedir=%{_includedir} GLEW_DEST= STRIP= libdir=%{_libdir} bindir=%{_bindir}
 
 %install
-make install.all GLEW_DEST= DESTDIR="$RPM_BUILD_ROOT" libdir=%{_libdir} bindir=%{_bindir} includedir=%{_includedir}
-find $RPM_BUILD_ROOT -type f -name "*.a" -delete
+rm -rf $RPM_BUILD_ROOT
+make install.all GLEW_DEST="$RPM_BUILD_ROOT" libdir=%{_libdir} bindir=%{_bindir} includedir=%{_includedir}
+rm -f $RPM_BUILD_ROOT%{_libdir}/libGLEW.a $RPM_BUILD_ROOT%{_libdir}/libGLEWmx.a
 # sigh
 chmod 0755 $RPM_BUILD_ROOT%{_libdir}/*.so*
+
+%clean
+rm -rf $RPM_BUILD_ROOT
 
 %post -n libGLEW -p /sbin/ldconfig
 
@@ -73,18 +78,22 @@ chmod 0755 $RPM_BUILD_ROOT%{_libdir}/*.so*
 %postun -n libGLEWmx -p /sbin/ldconfig
 
 %files
+%defattr(-,root,root,-)
 %doc LICENSE.txt
 %{_bindir}/*
 
 %files -n libGLEW
+%defattr(-,root,root,-)
 %doc LICENSE.txt
 %{_libdir}/libGLEW.so.*
 
 %files -n libGLEWmx
+%defattr(-,root,root,-)
 %doc LICENSE.txt
 %{_libdir}/libGLEWmx.so.*
 
 %files devel
+%defattr(-,root,root,-)
 %{_libdir}/libGLEW.so
 %{_libdir}/libGLEWmx.so
 %{_libdir}/pkgconfig/glew.pc
@@ -93,24 +102,8 @@ chmod 0755 $RPM_BUILD_ROOT%{_libdir}/*.so*
 %doc doc/*
 
 %changelog
-* Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.10.0-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
-
-* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.10.0-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
-
-* Sat May  3 2014 Peter Robinson <pbrobinson@fedoraproject.org> 1.10.0-3
-- Update config.guess for newer arch support
-- Modernise spec file
-
-* Mon Nov 18 2013 Dave Airlie <airlied@redhat.com> - 1.10.0-2
-- rebuilt for GLEW 1.10
-
-* Sun Nov 17 2013 Dave Airlie <airlied@redhat.com> 1.10.0-1
-- glew 1.10.0 + build fix + makefile hacks
-
-* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.9.0-4
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+* Wed Nov 06 2013 Dave Airlie <airlied@redhat.com> 1.9.0-4
+- fix build for non-x86 arch
 
 * Wed Feb 13 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.9.0-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
